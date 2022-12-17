@@ -1,3 +1,37 @@
+## Basic
+
+```js
+// make a geometry 
+
+// 1. make a scene
+const scene = new THREE.Scene()
+
+// 2. make a mesh
+const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+const material = new THREE.MeshBasicMaterial( { color: '#ff0000' } );
+const mesh = new THREE.Mesh( geometry, material );
+scene.add( mesh );
+ 
+// 3. Camera
+const camera = new THREE.PerspectiveCamera( 75, 5 / 3);
+scene.add( camera )
+
+const render = new THREE.WebGLRenderer({
+    canvas: document.getElementById('box')
+})
+
+render.setSize(document.body.clientHeight / 3 * 5, document.body.clientHeight)
+
+// 4. Adjust Camera
+camera.position.z = 3
+camera.position.x = 2
+
+// 5. render
+render.render(scene, camera)
+```
+
+
+
 ## Rotation
 
 ### reorder

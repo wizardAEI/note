@@ -546,7 +546,7 @@ func main() {
 
 ## 引用类型
 
-在 Go 语言中，引用类型有 切片(slice)、字典(又叫做映射 map) 以及 通道(chan) 。 注意结构体是基本类型，如果函数中传递的不是结构体的指针，则函数中的修改不会影响到原结构体。
+在 Go 语言中，引用类型有 切片(slice)、字典(又叫做映射 map)、接口（interface） 以及 通道(chan) 。 注意结构体是基本类型，如果函数中传递的不是结构体的指针，则函数中的修改不会影响到原结构体。
 
 其中的每个引用类型性质又不太一样，例如切片是对一部分数组的窗口和引用，字典是隐式指针所以当复制时会共享同一块底层数据... 但他们都可以达到复制或者传参时还是同一个地址的效果。
 
@@ -1111,7 +1111,13 @@ func PrintInfo() {
 }
 ```
 
+### 协程转让
 
+`runtime.Gosched()`这个函数的作用是让当前goroutine让出CPU，好让其它的goroutine获得执行的机会。同时，当前的goroutine也会在未来的某个时间点继续运行。
+
+### 多协程检测访问冲突
+
+如果又多个协程同时执行，可能会出现资源访问冲突，我们可以使用`go run -race xxx` 来检测
 
 ## 通道
 
@@ -1668,12 +1674,14 @@ a = "123" //此时type为string
 
 ## 断言
 
-断言就是将接口类型的值`x`转换成类型`T`。格式为：x.(T)
+### 基础
+
+断言就是将接口类型的**值**`x`转换成类型`T`。格式为：x.(T)
 
 - 类型断言的必要条件就x是接口类型，非接口类型的x不能做类型断言；
-- T可以是非接口类型，如果想断言合法，则T必须实现x的接口；
+- T可以是非接口类型（基础类型，结构体或者指针等），如果想断言合法，则T必须实现x的接口；
 - T也可以是接口，则x的动态类型也应该是接口T；
-- 类型断言如果非法，运行时会导致错误，为了避免这种错误，应该总是使用下面的方式来进行类型断言\
+- 类型断言如果非法，运行时会导致错误，为了避免这种错误，应该总是使用下面的方式来进行类型断言:
 
 ```go
 package main
@@ -1683,7 +1691,7 @@ import (
 )
 func main() {
   var x interface{}
-  x =100
+  x = 100
   value1,ok :=x.(int)
   if ok {
 	fmt.Println(value1)
@@ -1695,7 +1703,7 @@ func main() {
 }
 ```
 
-需要注意的如果不接收第二个参数也就是ok，这里失败的话则会直接panic这里还存在一种情况就是x为nil同样会panic
+需要注意的如果不接收第二个参数也就是ok，这里失败的话则会直接panic。这里还存在一种情况就是x为nil同样会panic
 
 若类型检查成功提取到的值也将拥有对应type的方法：
 
@@ -1770,6 +1778,36 @@ func check(v interface{}) {
 	case User:
 		v.(User).SayName()
 	}
+}
+```
+
+### 断言和指针
+
+```go
+type A struct {
+	name string
+}
+
+type Boy interface {
+	getName() string
+}
+
+func (receiver A) getName() string {
+	return receiver.name
+}
+
+func main() {
+	a := A{
+		name: "xiaoming",
+	}
+	formatName(&a)
+	fmt.Println(a.name) // Mr.xiaoming} 如果我们在下面使用 ns.(A) ，则值不会被修改
+}
+// 这里的形参类型为接口，我们传递结构体或者指针都可以
+func formatName(boy Boy) {
+	//n, _ := ns.(A) // 这里我们断言为结构体是不会报错的，go会帮我们自动解引用，但是这样我们后续的修改就不会影响传过来的参数了
+	n, _ := boy.(*A)
+	n.name = "Mr." + n.name
 }
 ```
 
@@ -1923,7 +1961,7 @@ func main() {
 
 
 
-## Go go install 和 go get的区别
+## go install 和 go get的区别
 
 [Go 1.16 中关于 go get 和 go install 你需要注意的地方 - 知乎 (zhihu.com)](https://zhuanlan.zhihu.com/p/338011682)
 
@@ -2032,7 +2070,7 @@ go的`var`和`const`的作用域总是在`{ }`中存在。只要变量存在作�
 
 ## fmt.Print 格式化
 
-## 1）普通占位符
+### 1 普通占位符
 
 | 占位符 |                     说明                     |             举例              |            输出             |
 | :----- | :------------------------------------------: | :---------------------------: | :-------------------------: |
@@ -2049,3 +2087,6 @@ go的`var`和`const`的作用域总是在`{ }`中存在。只要变量存在作�
 
 
 
+## 测试
+
+[Go Test 单元测试简明教程 | 快速入门 | 极客兔兔 (geektutu.com)](https://geektutu.com/post/quick-go-test.html)
