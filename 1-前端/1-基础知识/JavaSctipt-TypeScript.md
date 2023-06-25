@@ -338,7 +338,7 @@ let goods1 = goods.reduce(function(s,n) {
 浏览器 JS 引擎中：
 
 macrotask（按优先级顺序排列）: script(你的全部 JS 代码，“同步代码”）, **setTimeout**, **setInterval**, setImmediate(在一次 Event-Loop 后调用), I/O,UI rendering
-microtask（按优先级顺序排列）: **process.nextTick**, **Promises（这里指浏览器原生实现的 Promise）**, Object.observe, MutationObserver
+microtask（按优先级顺序排列）: **Promises（这里指浏览器原生实现的 Promise）**, MutationObserver, window.queueMicrotask
 JS 引擎首先从 macrotask queue 中取出第一个任务，执行完毕后，将 microtask queue 中的所有任务取出，按顺序全部执行；
 然后再从 macrotask queue（宏任务队列）中取下一个，执行完毕后，再次将 microtask queue（微任务队列）中的全部取出；
 循环往复，直到两个 queue 中的任务都取完。
@@ -2358,7 +2358,7 @@ javascript隐式转换规则
 - null：转为 "null"
 - undefined：转为 "undefined"
 - 布尔类型：true 和 false 分别被转为 "true" 和 "false"
-- 数字类型：转为数字的字符串形式，如 10 转为 "10" ， 1e21 转为 "1e+21"
+- 数字类型：转为数字的字符串形式，如 10 转为 "10" ， 1e10 转为 "10000000000"
 - 数组：相当于调用数组的 Array.prototype.join() 方法，如 [1, 2, 3] 转为 "1,2,3"，空数组 [] 转为 '' 空字符串，数组中的 null 或 undefined ，会被当做 '' 空字符串处理
 - 普通对象：相当于直接使用 `Object.prototype.toString()`，返回 "[object Object]"
 
@@ -2386,8 +2386,6 @@ ToPrimitive 指对象类型（如：对象、数组）转换为原始类型的�
 
 当对象类型需要被转为原始类型时，它会先查找对象的 `valueOf` 方法，如果 `valueOf` 方法返回**原始类型**的值，则 ToPrimitive 的结果就是这个值
 如果 `valueOf` 不存在或者 `valueOf` 方法返回的不是原始类型的值，就会尝试调用对象的 toString 方法，也就是会遵循对象的 ToString 规则，然后使用 toString 的返回值作为 ToPrimitive 的结果。
-
-
 
 ### 运算符中的隐式类型转换
 
@@ -2465,7 +2463,7 @@ true == '1'       // true
   * 这时候1 == '1'，这时候适用规则1，将'1'通过ToNumber操作转换为1
   * 1 == 1 所以输出为true
   **/
-var obj = {
+let obj = {
     valueOf: function() { return '1' }
 }
 true == obj      // true

@@ -1,3 +1,5 @@
+[前端汇总 (yuque.com)](https://www.yuque.com/cuggz/interview/famxgp)
+
 # HTML
 
 ## Dom 节点的类型
@@ -140,7 +142,7 @@ noScript在不支持脚本或者支持脚本但是被禁用时会显示出来：
 
 ```html
 <noscript>
-<p>
+	<p>
     本页面不支持脚本
     </p>
 </noscript>
@@ -576,3 +578,39 @@ body {
 }
 ```
 
+
+
+### CSS中括号的使用
+
+标签属性选择器
+
+      span[class='test']    =>匹配所有带有class类名test的span标签
+    
+      span[class *='test']  =>匹配所有包含了test字符串的class类名的span标签
+    
+      span[role]               =>匹配所有带有role属性的span标签
+    
+      [class='all']               =>匹配页面上所有带有class='all'的标签
+    
+      [class *='as']             =>匹配页面上所有class类且类名带有as字符串的类的标签
+
+
+
+### 大小写规范
+
+https://keqingrong.cn/blog/2021-05-29-case-sensitivity/
+
+
+
+### CSS命名规范
+
+https://juejin.cn/post/6844903672162304013
+
+
+
+### 如何使用CSS保持盒子的横纵比
+
+1. 使用`height: 0; padding:75%`来绘出一个4 : 3的盒子。如果需要在盒子里加内容，则盒子使用相对定位，内容盒子使用绝对定位。
+2. 使用新属性`aspect-ratio`
+
+https://juejin.cn/post/6844904070679887886
