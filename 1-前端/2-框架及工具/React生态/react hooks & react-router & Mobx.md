@@ -95,7 +95,19 @@ export function Son() {
 
 ## useRef
 
-用于获取dom对象
+`useRef` is a React Hook that lets you reference a value that’s not needed for rendering.
+
+Usage:
+
+1. Referencing a value with a ref
+
+   we can call useRef to declare a value (the ref object that have current property to store information)
+
+   the different between `useRef` and `useState` is: **changing a ref does not trigger a re-render and its value can be stored between re-renders** .
+
+   **that means use useRef you can change and store information between re-renders**
+
+2. 用于获取dom对象
 
 ```tsx
 ...
