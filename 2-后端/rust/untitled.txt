@@ -1,0 +1,85 @@
+use once_cell::sync::Lazy;
+use regex::Regex;
+use revolt_database::{Database, User};
+use revolt_models::v0;
+use revolt_quark::authifier::models::Session;
+use revolt_quark::{models::Channel, EmptyResponse, Result};
+use revolt_result::create_error;
+
+use rocket::{serde::json::Json, State};
+use serde::{Deserialize, Serialize};
+use ulid::Ulid;
+use validator::Validate;
+
+/// Regex for valid usernames
+///
+/// Block zero width space
+/// Block lookalike characters
+pub static RE_USERNAME: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(\p{L}|[\d_.-])+$").unwrap());
+
+/// # New User Data
+#[derive(Validate, Serialize, Deserialize, JsonSchema)]
+pub struct DataOnboard {
+    /// New username which will be used to identify the user on the platform
+    #[validate(length(min = 2, max = 32), regex = "RE_USERNAME")]
+    username: String,
+}
+
+/// # Complete Onboarding
+///
+/// This sets a new username, completes onboarding and allows a user to start using Revolt.
+#[openapi(tag = "Onboarding")]
+#[post("/complete", data = "<data>")]
+pub async fn req(
+    db: &State<Database>,
+    session: Session,
+    user: Option<User>,
+    data: Json<DataOnboard>,
+) -> Result<Json<v0::User>> {
+    if user.is_some() {
+        return Err(create_error!(AlreadyOnboarded));
+    }
+
+    let data = data.into_inner();
+    data.validate().map_err(|error| {
+        create_error!(FailedValidation {
+            error: error.to_string()
+        })
+    })?;
+
+    let username = User::validate_username(data.username)?;
+    let user = User {
+        id: session.user_id,
+        discriminator: User::find_discriminator(db, &username, None).await?,
+        username,
+        ..Default::default()
+    };
+    let res = db.insert_user(&user).await.map(|_| EmptyResponse);
+    if res.is_ok() {
+        let create_user = user.clone();
+        let server: revolt_quark::models::Server =
+            db.fetch_server("01H7A2D436ZP77QPQ0XK7HBG1H").await?;
+        let server2 = db.fetch_server("01H8ZPFYS25EWPA6884PCNTVET").await?;
+        server.create_member(db, create_user.clone(), None).await?;
+        server2.create_member(db, create_user, None).await?;
+        let group_id = Ulid::new().to_string();
+        let group = Channel::Group {
+            id: group_id.clone(),
+            name: String::from("多模型群聊"),
+            owner: user.id.clone(),
+            description: Some(String::from("默认群聊，可以通过@来调用大模型")),
+            recipients: vec![user.id.clone()],
+            icon: None,
+            last_message_id: None,
+            permissions: None,
+            nsfw: false,
+        };
+        group.create_group(db).await?;
+    };
+    Ok(Json(
+        User::create(db, data.username, session.user_id, None)
+            .await?
+            .into_self()
+            .await,
+    ))
+}
