@@ -165,7 +165,24 @@ a.SetString("240000000000000000000000000000000000000000", 10)
 type rune = int32
 ```
 
+### iota
 
+iota 可以简单地声明逐步扩展的数字常量。
+
+```go
+package main
+import "fmt"
+
+func main() {
+   
+const (
+	Low = iota
+	Medium = iota + 10
+	High
+)
+fmt.Printf("Low: %d\nMedium: %d\nHigh: %d\n", Low, Medium, High) // Low: 0 Medium: 11 High: 12
+}
+```
 
 ### **数组**
 
