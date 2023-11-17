@@ -59,6 +59,12 @@
 
 ## GoLand
 
+### 自定义高亮
+
+在 GoLand 中默认是 `TODO` 和 `FIXME` 高亮，如果需要自定义更多的高亮代码块，比如 `FEAT`，`NOTICE` 等，可以参考如下操作：
+
+点击 `Settings` -> `Editor` -> `TODO` 增加新的 `Patterns` -> 保存
+
 ### Tag 模板
 
 在 Go 项目中，我们经常需要写一些 tag 来满足框架需求，而基础的 tag 提示只有 `json`，`bson` 等。

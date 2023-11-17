@@ -1,2 +1,22 @@
 /其他/
 .DS_Store
+
+# 子文件夹下（可能多层）的 IDE 配置文件
+**/.idea
+**/.vscode
+
+# py
+venv
+
+# node
+.pnp.*
+.yarn/*
+
+# build
+dist
+build
+output
+
+# logs
+*.local
+*.log
